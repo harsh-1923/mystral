@@ -1,0 +1,522 @@
+---
+title: "useEffect vs useLayoutEffect"
+date: "2025-07-08"
+tags: ["react", "hooks", "performance", "dom"]
+tldr: "useEffect runs asynchronously after DOM updates, while useLayoutEffect runs synchronously before browser paint. Understanding when to use each is crucial for optimal React performance and user experience."
+---
+
+# useEffect vs useLayoutEffect: Understanding the Key Differences
+
+React's `useEffect` and `useLayoutEffect` are two powerful hooks that allow you to perform side effects in functional components. While they share similar APIs, they have fundamentally different execution timing that can significantly impact your application's performance and user experience.
+
+## Understanding the React Render Cycle
+
+Before diving into the differences, let's understand how React's rendering works:
+
+1. **Render Phase**: React creates a virtual representation of your UI
+2. **Commit Phase**: React applies changes to the actual DOM
+3. **Paint Phase**: The browser paints the updated DOM to the screen
+
+The key difference between `useEffect` and `useLayoutEffect` lies in **when** they execute relative to these phases.
+
+## useEffect: Asynchronous Side Effects
+
+`useEffect` is the most commonly used effect hook. It runs **asynchronously** after the browser has painted the DOM updates.
+
+### Basic Syntax
+
+```tsx
+useEffect(() => {
+  // Side effect code here
+  return () => {
+    // Cleanup code here
+  };
+}, [dependencies]);
+```
+
+### When useEffect Runs
+
+```tsx
+import React, { useState, useEffect } from 'react';
+
+function ExampleComponent() {
+  const [count, setCount] = useState(0);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    console.log('useEffect: DOM has been painted');
+    setMessage(`Count is now: ${count}`);
+  }, [count]);
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <p>{message}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </div>
+  );
+}
+```
+
+### Execution Timeline
+
+
+1. Component renders
+2. DOM updates
+3. Browser paints (user sees changes)
+4. useEffect runs ← Here!
+
+
+## useLayoutEffect: Synchronous Side Effects
+
+`useLayoutEffect` runs **synchronously** immediately after DOM mutations but before the browser paints. This makes it perfect for DOM measurements and mutations that need to happen before the user sees anything.
+
+### Basic Syntax
+
+```tsx
+useLayoutEffect(() => {
+  // Synchronous side effect code here
+  return () => {
+    // Cleanup code here
+  };
+}, [dependencies]);
+```
+
+### When useLayoutEffect Runs
+
+```tsx
+import React, { useState, useLayoutEffect, useRef } from 'react';
+
+function LayoutExample() {
+  const [width, setWidth] = useState(0);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    console.log('useLayoutEffect: DOM updated, but not painted yet');
+    if (elementRef.current) {
+      const newWidth = elementRef.current.offsetWidth;
+      setWidth(newWidth);
+    }
+  }, []);
+
+  return (
+    <div ref={elementRef}>
+      <p>Element width: {width}px</p>
+      <p>This measurement happens before paint!</p>
+    </div>
+  );
+}
+```
+
+### Execution Timeline
+
+```
+1. Component renders
+2. DOM updates
+3. useLayoutEffect runs ← Here!
+4. Browser paints (user sees changes)
+```
+
+## Key Differences Explained
+
+### 1. Timing
+
+**useEffect:**
+- Runs after the browser has painted
+- Asynchronous - doesn't block painting
+- User sees changes first, then effects run
+
+**useLayoutEffect:**
+- Runs before the browser paints
+- Synchronous - blocks painting until complete
+- Effects run first, then user sees changes
+
+### 2. Performance Impact
+
+```tsx
+// ❌ Bad: Heavy computation in useLayoutEffect
+function BadExample() {
+  const [data, setData] = useState([]);
+  
+  useLayoutEffect(() => {
+    // This blocks the paint!
+    const heavyComputation = performExpensiveCalculation();
+    setData(heavyComputation);
+  }, []);
+
+  return <div>{/* render data */}</div>;
+}
+
+// ✅ Good: Heavy computation in useEffect
+function GoodExample() {
+  const [data, setData] = useState([]);
+  
+  useEffect(() => {
+    // This doesn't block the paint
+    const heavyComputation = performExpensiveCalculation();
+    setData(heavyComputation);
+  }, []);
+
+  return <div>{/* render data */}</div>;
+}
+```
+
+### 3. DOM Measurements and Mutations
+
+**useLayoutEffect for DOM measurements:**
+
+```tsx
+import React, { useState, useLayoutEffect, useRef } from 'react';
+
+function MeasureComponent() {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (elementRef.current) {
+      const rect = elementRef.current.getBoundingClientRect();
+      setDimensions({
+        width: rect.width,
+        height: rect.height
+      });
+    }
+  }, []);
+
+  return (
+    <div ref={elementRef} style={{ padding: '20px', border: '1px solid black' }}>
+      <p>Width: {dimensions.width}px</p>
+      <p>Height: {dimensions.height}px</p>
+    </div>
+  );
+}
+```
+
+**useEffect for API calls and subscriptions:**
+
+```tsx
+import React, { useState, useEffect } from 'react';
+
+function DataFetchingComponent() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/data');
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  return <div>{/* render data */}</div>;
+}
+```
+
+## Practical Use Cases
+
+### When to Use useEffect
+
+1. **API calls and data fetching**
+2. **Subscriptions and event listeners**
+3. **Logging and analytics**
+4. **Heavy computations**
+5. **Cleanup operations**
+
+```tsx
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(`/api/users/${userId}`);
+        const userData = await response.json();
+        
+        if (isMounted) {
+          setUser(userData);
+          setLoading(false);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error fetching user:', error);
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUser();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
+
+  if (loading) return <div>Loading user...</div>;
+  if (!user) return <div>User not found</div>;
+
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+```
+
+### When to Use useLayoutEffect
+
+1. **DOM measurements that affect layout**
+2. **DOM mutations that prevent flickering**
+3. **Synchronous DOM updates**
+4. **Tooltip positioning**
+5. **Modal positioning**
+
+```tsx
+import React, { useState, useLayoutEffect, useRef } from 'react';
+
+function Tooltip({ children, content }) {
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [isVisible, setIsVisible] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (isVisible && triggerRef.current && tooltipRef.current) {
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+      
+      // Calculate position to center tooltip above trigger
+      const top = triggerRect.top - tooltipRect.height - 8;
+      const left = triggerRect.left + (triggerRect.width / 2) - (tooltipRect.width / 2);
+      
+      setPosition({ top, left });
+    }
+  }, [isVisible]);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div
+        ref={triggerRef}
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+      >
+        {children}
+      </div>
+      
+      {isVisible && (
+        <div
+          ref={tooltipRef}
+          style={{
+            position: 'fixed',
+            top: position.top,
+            left: position.left,
+            backgroundColor: 'black',
+            color: 'white',
+            padding: '8px',
+            borderRadius: '4px',
+            zIndex: 1000,
+          }}
+        >
+          {content}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## Preventing Flickering with useLayoutEffect
+
+One of the most common use cases for `useLayoutEffect` is preventing visual flickering:
+
+```tsx
+import React, { useState, useLayoutEffect } from 'react';
+
+function FlickerExample() {
+  const [theme, setTheme] = useState('light');
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent flash of wrong theme
+  useLayoutEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    setMounted(true);
+  }, []);
+
+  // Apply theme immediately
+  useLayoutEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  if (!mounted) {
+    return null; // Don't render until theme is loaded
+  }
+
+  return (
+    <div className={`app ${theme}`}>
+      <h1>Theme: {theme}</h1>
+      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+        Toggle Theme
+      </button>
+    </div>
+  );
+}
+```
+
+## Performance Considerations
+
+### useEffect Performance
+
+```tsx
+// ✅ Good: useEffect for non-critical updates
+function PerformanceExample() {
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [filter, setFilter] = useState('');
+
+  useEffect(() => {
+    // This won't block the UI
+    const filtered = data.filter(item => 
+      item.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [data, filter]);
+
+  return (
+    <div>
+      <input 
+        value={filter} 
+        onChange={(e) => setFilter(e.target.value)} 
+        placeholder="Filter data..."
+      />
+      <ul>
+        {filteredData.map(item => (
+          <li key={item.id}>{item.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### useLayoutEffect Performance
+
+```tsx
+// ⚠️ Use sparingly: useLayoutEffect for critical updates only
+function CriticalUpdate() {
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    // Only use for critical DOM updates
+    if (elementRef.current) {
+      elementRef.current.scrollTop = scrollPosition;
+    }
+  }, [scrollPosition]);
+
+  return (
+    <div 
+      ref={elementRef}
+      style={{ height: '200px', overflow: 'auto' }}
+    >
+      {/* content */}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+### 1. Default to useEffect
+
+```tsx
+// ✅ Start with useEffect
+useEffect(() => {
+  // Most side effects should use useEffect
+}, []);
+```
+
+### 2. Use useLayoutEffect Only When Necessary
+
+```tsx
+// ✅ Only use useLayoutEffect for DOM measurements/mutations
+useLayoutEffect(() => {
+  // DOM measurement or mutation that affects layout
+}, []);
+```
+
+### 3. Avoid Heavy Computations in useLayoutEffect
+
+```tsx
+// ❌ Don't do this
+useLayoutEffect(() => {
+  performExpensiveCalculation(); // Blocks paint!
+}, []);
+
+// ✅ Do this instead
+useEffect(() => {
+  performExpensiveCalculation(); // Doesn't block paint
+}, []);
+```
+
+### 4. Combine Both When Needed
+
+```tsx
+function ComplexComponent() {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [data, setData] = useState(null);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  // Measure DOM synchronously
+  useLayoutEffect(() => {
+    if (elementRef.current) {
+      const rect = elementRef.current.getBoundingClientRect();
+      setDimensions({ width: rect.width, height: rect.height });
+    }
+  }, []);
+
+  // Fetch data asynchronously
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('/api/data');
+      const result = await response.json();
+      setData(result);
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <div ref={elementRef}>
+      <p>Dimensions: {dimensions.width} x {dimensions.height}</p>
+      <p>Data: {data ? 'Loaded' : 'Loading...'}</p>
+    </div>
+  );
+}
+```
+
+
+### Key Takeaways
+
+1. **Start with `useEffect`** for most side effects
+2. **Use `useLayoutEffect`** only when you need synchronous DOM updates
+3. **Avoid heavy computations** in `useLayoutEffect`
+4. **Measure DOM** with `useLayoutEffect`, **fetch data** with `useEffect`
+5. **Prevent flickering** with `useLayoutEffect`, **handle async operations** with `useEffect`
+
+Understanding these differences will help you write more performant React applications and provide better user experiences. Choose the right hook based on your specific use case and timing requirements.
