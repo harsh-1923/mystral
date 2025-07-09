@@ -105,7 +105,7 @@ const ClipPathTabs = ({
         ))}
       </ul>
 
-      <div
+     {controlledActiveTab &&  <div
         aria-hidden
         className={clsx(
           "absolute z-10 w-full overflow-hidden transition-[clip-path] duration-250 ease-in-out",
@@ -134,7 +134,7 @@ const ClipPathTabs = ({
             </li>
           ))}
         </ul>
-      </div>
+      </div>}
     </div>
   );
 };

@@ -18,7 +18,7 @@ const DemoArea = ({
       className={cn(
         "flex items-center justify-center w-full min-h-80 rounded-md relative overflow-hidden border border-[var(--colors-gray6)] bg-cover",
         preferedTheme === "light"
-          ? "dark:bg-[var(--colors-gray12)] bg-[var(--colors-gray1)]"
+          ? "bg-white"
           : preferedTheme === "dark"
           ? "bg-[var(--colors-gray12)] dark:bg-[var(--colors-gray1)]"
           : "bg-[var(--colors-gray1)]",
