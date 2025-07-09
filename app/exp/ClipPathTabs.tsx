@@ -11,6 +11,7 @@ type ClipPathTabsProps = {
   slowed?: boolean;
   onTabClick?: (tab: string) => void;
   tabColor?: string;
+  activeTab?: string; // Add this line
 };
 
 const getTabsInView = (tabsLength: number) => {
@@ -33,11 +34,13 @@ const ClipPathTabs = ({
   slowed = false,
   onTabClick,
   tabColor = "#ff4d00",
+  activeTab: controlledActiveTab, // Add this line
 }: ClipPathTabsProps) => {
   const [tabsInView, setTabsInView] = React.useState<number>(() =>
     getTabsInView(tabs.length)
   );
-  const [activeTab, setActiveTab] = React.useState(tabs[0].name);
+  // Remove local state for activeTab
+  // const [activeTab, setActiveTab] = React.useState(tabs[0].name);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const activeTabElementRef = React.useRef<HTMLButtonElement>(null);
 
@@ -57,13 +60,11 @@ const ClipPathTabs = ({
 
   React.useEffect(() => {
     const container = containerRef.current;
-
+    const activeTab = controlledActiveTab ?? tabs[0].name;
     if (activeTab && container) {
       const activeTabElement = activeTabElementRef.current;
-
       if (activeTabElement) {
         const { offsetLeft, offsetWidth } = activeTabElement;
-
         const clipLeft = offsetLeft;
         const clipRight = offsetLeft + offsetWidth;
         container.style.clipPath = `inset(0 ${Number(
@@ -73,7 +74,13 @@ const ClipPathTabs = ({
         ).toFixed()}% round 17px)`;
       }
     }
-  }, [activeTab, activeTabElementRef, containerRef, tabsInView]);
+  }, [
+    controlledActiveTab,
+    activeTabElementRef,
+    containerRef,
+    tabsInView,
+    tabs,
+  ]);
 
   return (
     <div className="relative flex flex-col w-full mx-auto">
@@ -81,10 +88,12 @@ const ClipPathTabs = ({
         {tabs.slice(0, tabsInView).map((tab) => (
           <li key={tab.name}>
             <button
-              ref={activeTab === tab.name ? activeTabElementRef : null}
+              ref={
+                controlledActiveTab === tab.name ? activeTabElementRef : null
+              }
               data-tab={tab.name}
               onClick={() => {
-                setActiveTab(tab.name);
+                // setActiveTab(tab.name); // Remove this line
                 onTabClick?.(tab.name);
               }}
               className="flex h-[34px] items-center gap-2 rounded-[17px] p-4 text-sm font-medium text-black no-underline"
@@ -113,7 +122,7 @@ const ClipPathTabs = ({
               <button
                 data-tab={tab.name}
                 onClick={() => {
-                  setActiveTab(tab.name);
+                  // setActiveTab(tab.name); // Remove this line
                   onTabClick?.(tab.name);
                 }}
                 className="flex h-[34px] items-center gap-2 rounded-full p-4 text-sm font-medium text-white no-underline"

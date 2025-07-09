@@ -5,6 +5,21 @@ tags: ["react", "hooks", "performance", "dom"]
 tldr: "useEffect runs asynchronously after DOM updates, while useLayoutEffect runs synchronously before browser paint. Understanding when to use each is crucial for optimal React performance and user experience."
 ---
 
+
+
 <DemoArea preferedTheme="light" className="min-h-[400px]">
   <XyneChatbox />
 </DemoArea>
+
+## Features
+
+- Tabbed interface: Switch between "Ask AI" and "Search" modes
+- Keyboard shortcut: `Ctrl+T` toggles between tabs
+- Animated transitions for tabs and input area
+- Key focus on accessibility 
+  - No `tab` highjack
+  - use `CTRL + T` to toggle
+  - Proper semantic tags
+  - Scope for proper aria-labels
+  - No `contentEditable` to prevent script injection risks
+- Interruptible animations
