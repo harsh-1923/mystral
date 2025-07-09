@@ -1,7 +1,7 @@
-import React from 'react'
-import { BlogMeta, getAllWritings } from './utils/getAllWritings';
-import Link from 'next/link';
-import { ScrambledLink } from '../craft/page';
+import React from "react";
+import { getAllWritings } from "./utils/getAllWritings";
+import Link from "next/link";
+import TextScramble from "../components/effects/TextScramble";
 
 const page = () => {
   const writings = getAllWritings();
@@ -19,10 +19,34 @@ const page = () => {
       </div>
     </main>
   );
-}
-
-const WritingsItem = ({ writing }: { writing: BlogMeta }) => {
-  return <Link href={writing.relPath}>{writing.title}</Link>;
 };
 
-export default page
+const ScrambledLink = ({
+  title,
+  href,
+  date,
+}: {
+  title: string;
+  href: string;
+  date: string;
+}) => {
+  return (
+    <Link
+      href={href}
+      className="h-12 w-full flex items-center justify-between px-4"
+    >
+      <TextScramble
+        text={title}
+        scrambleSpeed={25}
+        scrambledLetterCount={5}
+        autoStart={true}
+        characters="abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+"
+      />
+      <div className="text-sm font-mono text-[var(--colors-gray11)]">
+        {date}
+      </div>
+    </Link>
+  );
+};
+
+export default page;

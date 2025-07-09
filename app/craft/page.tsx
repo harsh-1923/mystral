@@ -1,5 +1,5 @@
 import React from "react";
-import { BlogMeta, getAllCrafts } from "./utils/getAllCrafts";
+import {  getAllCrafts } from "./utils/getAllCrafts";
 
 import Link from "next/link";
 import TextScramble from "../components/effects/TextScramble";
@@ -18,7 +18,7 @@ const page = () => {
 };
 
 
-export const ScrambledLink = ({
+const ScrambledLink = ({
   title,
   href,
   date,
