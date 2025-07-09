@@ -24,7 +24,8 @@
     "react-wrap-balancer": "^1.1.1",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.6",
-    "sugar-high": "^0.9.3"
+    "sugar-high": "^0.9.3",
+    "clsx": "^2.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
