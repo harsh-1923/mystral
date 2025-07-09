@@ -1,18 +1,24 @@
 import React from 'react'
 import { BlogMeta, getAllWritings } from './utils/getAllWritings';
 import Link from 'next/link';
+import { ScrambledLink } from '../craft/page';
 
 const page = () => {
   const writings = getAllWritings();
-  console.log(writings);
   return (
-    <div>
-      <h1>This is the root page of the writings section.</h1>
-      {writings.map((writing) => (
-        <WritingsItem key={writing.slug} writing={writing} />
-      ))}
-    </div>
-  )
+    <main className="w-screen min-h-screen">
+      <div className="w-full min-h-screen flex flex-col items-start max-w-3xl mx-auto">
+        {writings.map((writing) => (
+          <ScrambledLink
+            key={writing.slug}
+            title={writing.title}
+            href={writing.relPath}
+            date={writing.date}
+          />
+        ))}
+      </div>
+    </main>
+  );
 }
 
 const WritingsItem = ({ writing }: { writing: BlogMeta }) => {

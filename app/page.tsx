@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import Link from "next/link";
 import HeroBanner from "./components/HomePageComponents/HeroBanner/HeroBanner";
 import CurrentTime from "./components/HomePageComponents/CurrentTime";

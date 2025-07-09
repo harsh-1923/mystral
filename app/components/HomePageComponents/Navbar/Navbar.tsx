@@ -24,15 +24,15 @@ const Navbar = () => {
         <Link href="/" className="z-[999999]">
           <Sign />
         </Link>
-
+{/* 
         <button
           className="sm:hidden z-[999999]"
           onClick={() => toast("In Progress")}
         >
           <Menu />
-        </button>
+        </button> */}
 
-        <div className="hidden space-x-6 sm:block z-[999999]">
+        <div className="space-x-6 block z-[999999]">
           <Link
             href="/craft"
             className={`font-[family-name:var(--font-geist-mono)] bg-blend-difference text-sm font-medium hover:text-[var(--foreground)] transition-colors dura ${
@@ -43,7 +43,7 @@ const Navbar = () => {
           >
             Craft
           </Link>
-          <Link
+          {/* <Link
             href="/writings"
             className={`font-[family-name:var(--font-geist-mono)] bg-blend-difference text-sm font-medium hover:text-[var(--foreground)] transition-colors dura ${
               pathname === "/writing"
@@ -52,7 +52,7 @@ const Navbar = () => {
             }`}
           >
             Writing
-          </Link>
+          </Link> */}
         </div>
       </div>
     </nav>

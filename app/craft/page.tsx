@@ -5,11 +5,11 @@ import Link from "next/link";
 import TextScramble from "../components/effects/TextScramble";
 
 const page = () => {
-  const writings = getAllCrafts();
+  const crafts = getAllCrafts();
   return (
     <main className="w-screen min-h-screen">
       <div className="w-full min-h-screen flex flex-col items-start max-w-3xl mx-auto">
-        {writings.map((writing) => (
+        {crafts.map((writing) => (
           <ScrambledLink key={writing.slug} title={writing.title} href={writing.relPath} date={writing.date} />
         ))}
       </div>
@@ -18,7 +18,7 @@ const page = () => {
 };
 
 
-const ScrambledLink = ({
+export const ScrambledLink = ({
   title,
   href,
   date,
