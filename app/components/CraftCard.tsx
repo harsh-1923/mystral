@@ -141,10 +141,6 @@ const CraftCard = ({
     };
   }, [id]);
 
-  useEffect(() => {
-    console.log("Rendered");
-  }, []);
-
   return (
     <div className="w-full">
       <div className="w-full relative" ref={doubleTapAbleAreaRef}>
@@ -171,8 +167,8 @@ const CraftCard = ({
               rotate: Math.floor(Math.random() * 91) - 45,
             }}
             style={{
-              left: tapPosition.x - 20,
-              top: tapPosition.y - 20,
+              left: tapPosition.x - 10,
+              top: tapPosition.y - 10,
             }}
           >
             <Heart className="w-4 h-4 text-red-500" fill="currentColor" />
