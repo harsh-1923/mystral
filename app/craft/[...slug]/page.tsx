@@ -7,10 +7,10 @@ import CraftHeader from "@/app/components/ui/CraftHeader";
 import CraftFooter from "@/app/components/ui/CraftFooter";
 import { Metadata } from "next";
 
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ slug: string[] }> 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
   const slug = resolvedParams.slug.join("/");
@@ -54,8 +54,6 @@ const Page = async ({ params }: { params: Promise<{ slug: string[] }> }) => {
   }
 
   const components = useMDXComponents();
-
-  
 
   return (
     <article className="max-w-[80ch] w-full mx-auto px-4">
