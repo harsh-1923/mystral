@@ -171,11 +171,11 @@ const CraftCard = ({
               rotate: Math.floor(Math.random() * 91) - 45,
             }}
             style={{
-              left: tapPosition.x - 10,
-              top: tapPosition.y - 10,
+              left: tapPosition.x - 20,
+              top: tapPosition.y - 20,
             }}
           >
-            <Heart className="w-5 h-5 text-red-500" fill="currentColor" />
+            <Heart className="w-4 h-4 text-red-500" fill="currentColor" />
           </motion.div>
         )}
       </div>
@@ -192,7 +192,7 @@ const CraftCard = ({
                 duration: 0.2,
               }}
             >
-              <Heart className="w-4 h-4 text-red-500" fill="currentColor" />
+              <Heart className="w-5 h-5 text-red-500" fill="currentColor" />
             </motion.div>
           ) : (
             <button
