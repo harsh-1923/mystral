@@ -97,6 +97,7 @@ const CraftCard = ({
         // Wait for AWAIT_TIME then show placeholder
         setTimeout(() => {
           setShowPlaceholder(true);
+          setShowHeart(false);
         }, AWAIT_TIME);
       }, 50);
     },
@@ -139,6 +140,10 @@ const CraftCard = ({
       subscription.unsubscribe();
     };
   }, [id]);
+
+  useEffect(() => {
+    console.log("Rendered");
+  }, []);
 
   return (
     <div className="w-full">
