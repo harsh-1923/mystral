@@ -22,6 +22,8 @@ export const useDoubleTap = (
   const tapCount = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTapPosition = useRef<TapPosition>({ x: 0, y: 0 });
+  const touchStartPosition = useRef<TapPosition>({ x: 0, y: 0 });
+  const hasMoved = useRef<boolean>(false);
 
   const handleTap = useCallback(
     (position: TapPosition) => {
@@ -57,28 +59,59 @@ export const useDoubleTap = (
     [onDoubleTap, onSingleTap, threshold, maxDelay]
   );
 
-  const handleTouchStart = useCallback(
-    (e: TouchEvent) => {
-      // Prevent default behavior to avoid conflicts
-      e.preventDefault();
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    const touch = e.touches[0];
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const position: TapPosition = {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+    };
 
+    touchStartPosition.current = position;
+    hasMoved.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (e.touches.length > 0) {
       const touch = e.touches[0];
       const rect = (e.target as HTMLElement).getBoundingClientRect();
-      const position: TapPosition = {
+      const currentPosition: TapPosition = {
         x: touch.clientX - rect.left,
         y: touch.clientY - rect.top,
       };
 
-      handleTap(position);
+      // Calculate distance moved
+      const distance = Math.sqrt(
+        Math.pow(currentPosition.x - touchStartPosition.current.x, 2) +
+          Math.pow(currentPosition.y - touchStartPosition.current.y, 2)
+      );
+
+      // If moved more than 10px, consider it a scroll
+      if (distance > 10) {
+        hasMoved.current = true;
+      }
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      // Only handle as tap if there was no significant movement
+      if (!hasMoved.current) {
+        const touch = e.changedTouches[0];
+        const rect = (e.target as HTMLElement).getBoundingClientRect();
+        const position: TapPosition = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top,
+        };
+
+        handleTap(position);
+      }
     },
     [handleTap]
   );
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
-      // Prevent default behavior to avoid conflicts
-      e.preventDefault();
-
       const rect = (e.target as HTMLElement).getBoundingClientRect();
       const position: TapPosition = {
         x: e.clientX - rect.left,
@@ -97,20 +130,28 @@ export const useDoubleTap = (
 
     // For touch devices
     element.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
+      passive: true,
+    });
+    element.addEventListener("touchmove", handleTouchMove, {
+      passive: true,
+    });
+    element.addEventListener("touchend", handleTouchEnd, {
+      passive: true,
     });
 
     // For mouse devices
-    element.addEventListener("click", handleClick, { passive: false });
+    element.addEventListener("click", handleClick, { passive: true });
 
     return () => {
       element.removeEventListener("touchstart", handleTouchStart);
+      element.removeEventListener("touchmove", handleTouchMove);
+      element.removeEventListener("touchend", handleTouchEnd);
       element.removeEventListener("click", handleClick);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [ref, handleTouchStart, handleClick]);
+  }, [ref, handleTouchStart, handleTouchMove, handleTouchEnd, handleClick]);
 
   // Cleanup function
   const cleanup = useCallback(() => {
