@@ -18,7 +18,7 @@ const CraftCard = ({
   date: string;
 }) => {
   const uniqueId = useId();
-  const AWAIT_TIME = 300;
+  const AWAIT_TIME = 400;
   const doubleTapAbleAreaRef = React.useRef<HTMLDivElement>(null);
   const [tapPosition, setTapPosition] = useState({ x: 0, y: 0 });
   const [showHeart, setShowHeart] = useState(false);
@@ -167,28 +167,57 @@ const CraftCard = ({
               rotate: Math.floor(Math.random() * 91) - 45,
             }}
             style={{
-              left: tapPosition.x - 10,
-              top: tapPosition.y - 10,
+              left: tapPosition.x - 20,
+              top: tapPosition.y - 20,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 550,
+              damping: 30,
+              mass: 1.2,
             }}
           >
-            <Heart className="w-4 h-4 text-red-500" fill="currentColor" />
+            <Heart
+              className="size-7"
+              style={{ fill: "url(#heart-gradient)" }}
+              stroke="none"
+            />
           </motion.div>
         )}
+        {/* SVG Gradient Definition */}
+        <svg
+          width="0"
+          height="0"
+          style={{ position: "absolute", visibility: "hidden" }}
+        >
+          <defs>
+            <linearGradient
+              id="heart-gradient"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <stop offset="0%" stopColor="#ff8c42" />
+              <stop offset="100%" stopColor="#ff4444" />
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
-      <div className="py-2">
-        <h3 className="font-medium">{title}</h3>
+      <div className="pt-5">
+        <h3 className="font-medium text-lg">{title}</h3>
         <div className="flex items-center gap-1">
           {showPlaceholder ? (
             <motion.div
               key={`heart-placeholder-${uniqueId}`}
               id={placeholderId}
               layoutId={layoutId}
-              className="w-4 h-4 flex items-center justify-center"
+              className="flex items-center justify-center"
               transition={{
                 duration: 0.2,
               }}
             >
-              <Heart className="w-5 h-5 text-red-500" fill="currentColor" />
+              <Heart className="size-5 text-red-500" fill="currentColor" />
             </motion.div>
           ) : (
             <button
@@ -199,7 +228,7 @@ const CraftCard = ({
               }}
               disabled={isLoading}
             >
-              <Heart className="w-4 h-4" />
+              <Heart className="size-5" />
             </button>
           )}
           <span className="text-sm">{isLoading ? "..." : likeCount}</span>
