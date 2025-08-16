@@ -5,7 +5,8 @@ import CraftHeader from "./app/components/ui/CraftHeader";
 import DemoArea from "./app/components/DemoArea";
 import DemoClipPathTabs from "@/app/demos/DemoClipPathTabs";
 import XyneChatbox from "./app/exp/XyneChat";
-
+import DoubleTapLike from "./app/exp/DoubleTapLike";
+import GlyphInspectClip from "./app/exp/GlyphInspector";
 
 type HeadingProps = ComponentPropsWithoutRef<"h1">;
 type ParagraphProps = ComponentPropsWithoutRef<"p">;
@@ -115,7 +116,9 @@ const components = {
   CraftHeader,
   DemoArea,
   DemoClipPathTabs,
-  XyneChatbox
+  XyneChatbox,
+  DoubleTapLike,
+  GlyphInspectClip,
 };
 
 declare global {
